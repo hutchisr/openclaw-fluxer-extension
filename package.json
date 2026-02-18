@@ -1,0 +1,17 @@
+{
+  "name": "@openclaw/fluxer",
+  "version": "0.1.0",
+  "description": "OpenClaw Fluxer channel plugin",
+  "type": "module",
+  "openclaw": {
+    "extensions": ["./index.ts"]
+  },
+  "dependencies": {
+    "@discordjs/core": "^2.0.0",
+    "@discordjs/rest": "^2.0.0",
+    "@discordjs/ws": "^2.0.0"
+  },
+  "devDependencies": {
+    "openclaw": "*"
+  }
+}
