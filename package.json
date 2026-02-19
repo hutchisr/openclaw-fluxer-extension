@@ -4,7 +4,9 @@
   "description": "OpenClaw Fluxer channel plugin",
   "type": "module",
   "openclaw": {
-    "extensions": ["./index.ts"]
+    "extensions": [
+      "./index.ts"
+    ]
   },
   "dependencies": {
     "@discordjs/core": "^2.0.0",
@@ -12,6 +14,7 @@
     "@discordjs/ws": "^2.0.0"
   },
   "devDependencies": {
-    "openclaw": "*"
+    "openclaw": "*",
+    "typescript": "^5.9.3"
   }
 }

@@ -25,6 +25,12 @@ export async function monitorFluxerProvider(opts: FluxerMonitorOpts): Promise<vo
     intents: 0,
     rest,
     version: FLUXER_VERSION,
+    initialPresence: {
+      status: "online" as any,
+      activities: [],
+      since: null,
+      afk: false,
+    },
   });
   const client = new Client({ rest, gateway });
 

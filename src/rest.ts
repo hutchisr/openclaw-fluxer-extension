@@ -4,8 +4,10 @@ const FLUXER_API = "https://api.fluxer.app";
 const FLUXER_VERSION = "1";
 
 let restClient: REST | null = null;
+let botToken: string | null = null;
 
 export function initRest(token: string): REST {
+  botToken = token;
   restClient = new REST({ api: FLUXER_API, version: FLUXER_VERSION }).setToken(token);
   return restClient;
 }
@@ -56,7 +58,7 @@ export async function sendMessage(
     body.message_reference = { message_id: opts.replyTo };
   }
 
-  // If mediaUrl is provided, download and attach as multipart form
+  // If mediaUrl is provided, download and attach via multipart form
   if (opts?.mediaUrl) {
     const fs = await import("node:fs");
     const path = await import("node:path");
@@ -77,18 +79,27 @@ export async function sendMessage(
       filename = path.basename(opts.mediaUrl);
     }
 
-    // Use @discordjs/rest file upload format
-    const result = (await rest.post(`/channels/${channelId}/messages`, {
-      body,
-      files: [
-        {
-          name: filename,
-          data: fileBuffer,
-          contentType: contentType ?? "application/octet-stream",
-        },
-      ],
-    })) as { id?: string; channel_id?: string };
+    // Fluxer requires attachments metadata array when uploading files
+    body.attachments = [{ id: "0", filename }];
 
+    // Use native FormData for multipart upload
+    const form = new FormData();
+    form.append("payload_json", JSON.stringify(body));
+    form.append("files[0]", new Blob([fileBuffer], { type: contentType ?? "application/octet-stream" }), filename);
+
+    const apiBase = "https://api.fluxer.app";
+    const response = await fetch(`${apiBase}/v1/channels/${channelId}/messages`, {
+      method: "POST",
+      headers: { "Authorization": `Bot ${botToken}` },
+      body: form,
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Fluxer upload failed (${response.status}): ${errText}`);
+    }
+
+    const result = (await response.json()) as { id?: string; channel_id?: string };
     return { messageId: result?.id, channelId: result?.channel_id };
   }
 
